@@ -38,10 +38,20 @@ pipeline {
 
         stage('deploy') {
            steps {
+               input {
+                   message "Select the environment to deploy to"
+                   ok "Done"
+                   parameters {
+                       choice(name: 'ENV', choices; ['dev', 'staging', 'prod'], descriptions: '')
+                   }
+               }
                 script {
                     gv.deployApp()
+                    echo "Deploying to ${ENV}"
                 }
             }
         }
     }
 }
+
+// NB: The parameter defined inside this stage is scoped to that stage. Declare it as a variable to use it anywhere else
