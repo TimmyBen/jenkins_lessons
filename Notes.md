@@ -1,0 +1,2 @@
+- Use <jenkins_IP:port>/env-vars.html/ to check the list of environment variables you have available for use in your Jenkinsfile.
+-
