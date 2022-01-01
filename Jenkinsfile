@@ -20,4 +20,15 @@ pipeline {
             }
         }
     }
+    post {   // Used to do some action after the original build sequence has exited. 
+        always {
+            // Do this action if the build stage succeeded
+        }
+        success {
+            //
+        }
+        failure {
+            //
+        }
+    }
 }
