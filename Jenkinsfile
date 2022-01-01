@@ -1,34 +1,34 @@
-CODE_CHANGES = getGitChanges() // getGitChanges() will be an external groovy script that checks if any changes have been made to the code 
+
 pipeline {
     agent any
+    environment { // The environment variables defined here will be available for all the blocks in your pipeline
+        NEW_VERSION = '1.2.0'
+        SERVER_CREDENTIALS = credentials('server-credentials')  // The credentials and credentials binding are two plugins that allows you to use your Jenkins credentials inside your Jenkinsfile. It takes the credentials ID as an argument
+    }
     stages {
         stage('build') {
-             when {
-                expression {
-                    BRANCH_NAME == 'dev' && CODE_CHANGES == 'true' // The CODE_CHANGES variable could be one you defined yourself as seen above. 
-                }
-            }
             steps {
-                echo "building the application..."
+                echo "building the application"
+                echo "building version ${NEW_VERSION}"  // This is an enviroment variable. 
             }
         }
 
         stage('test') {
-            when {
-                expression {
-                    BRANCH_NAME == 'dev' || BRANCH_NAME == 'master' //The BRANCH_NAME variable is an environment available out of the box. This stage will only excecute if the current branch is "dev" or "master" in this example. 
-                }
-            }
             steps {
-                echo "testing the application..."
+                echo "testing the application"
+                echo "deploying with ${SERVER_CREDENTIALS}"
+                withCredentials([               
+                    usernamePassword(credentials: 'server-credentials', usernameVariable: USER, passwordVariable: PWD) 
+                ]) {
+                   sh "some script ${USER} ${PWD}"
+                }
             }
         }
 
         stage('deploy') {
             steps {
-                echo "deploying the application..."
+                echo "deploying the application"
             }
         }
     }
-    
 }
