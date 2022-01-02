@@ -1,51 +1,38 @@
-def gv 
 
 pipeline {
     agent any
-    parameter {
-        // string(name: 'VERSION', defaultValue: '', description: 'version to deploy on prod')
-        choice(name: 'VERSION', choices; ['1.1.0', '1.2.0', '1.3.0'], descriptions: '')
-        booleanParam(name: 'executeTests', defaultValue: true, description: '')
+    tools {
+        maven "Maven"
     }
     stages {
-        stage('init') {
+        stage('build jar') {
             steps {
                 script {
-                    gv = load "script.groovy"
-                }
-            }
-        }
-        stage('build') {
-            steps {
-                script {
-                    gv.buildApp()
+                    echo "building the application..."
+                    sh "mvn package"
                 }
             }
         }
 
-        stage('test') {
-            when {
-                expression {
-                    params.executeTests
-                }
-            }
+        stage('build image') {
             steps {
                 script {
-                    gv.testApp()
+                    echo "building the docker image..."
+                    withCredentials([userNamePassword(credentialsId: 'docker-hub-repo', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                        sh 'docker build -t nanajanashia/demo-app:jma-2.0 .'
+                        sh "echo $PASS | docker login -u $USER --password-stdin"
+                        sh "docker push nanajanashia/demo-app:jma-2.0"
+                    }       
                 }
             }
         }
 
         stage('deploy') {
-           steps {
+            steps {
                 script {
-                    env.ENV = input message: "Select the environment to deploy to", ok: "Done", paramaters: [choice(name: 'ENV', choices; ['dev', 'staging', 'prod'], descriptions: '')]
-                    gv.deployApp()
-                    echo "Deploying to ${ENV}"
+                    echo "deploying the application..."
                 }
             }
         }
     }
 }
-
-// NB: The parameter defined inside this stage is scoped to that stage. Declare it as a variable to use it anywhere else
