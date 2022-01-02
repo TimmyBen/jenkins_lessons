@@ -1,22 +1,29 @@
+// Branch based logic for multibranch pipeline
 
 pipeline {
     agent any
     stages {
         stage('build') {
             steps {
-                echo "buildong the application"
+                script {
+                    echo "building the application"
+                }
             }
         }
 
         stage('test') {
             steps {
-                echo "testing the application"
+                script {
+                    echo "testing the application"
+                }
             }
         }
 
         stage('deploy') {
             steps {
-                echo "deploying the application"
+                script {
+                    echo "deploying the application"
+                }
             }
         }
     }
